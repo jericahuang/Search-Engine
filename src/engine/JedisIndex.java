@@ -1,4 +1,5 @@
 package engine;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,20 +82,22 @@ public class JedisIndex {
 		return set;
 	}
 
-	public Double getURLSetSize(String term) {
+
+        public Double getURLSetSize(String term) {
 		double setSize = (double) jedis.scard(urlSetKey(term));
 		return setSize;
 	}
-
+	
+	
 	public double idf(String term) {
 		double num = 0;
-
+		
 		/*Set<String> termURLs = getURLs(term);
 		for (String url: termURLs){
 			num = num + getCount(url, term);
 		}*/
-
-		Map<String, Double> urlMap = getCounts(term);
+		
+		Map<String, Integer> urlMap = getCounts(term);
 		Iterator iter = urlMap.entrySet().iterator();
 		while (iter.hasNext()){
 			Map.Entry kv = (Map.Entry)iter.next();
@@ -102,13 +105,12 @@ public class JedisIndex {
 			num = num + val;
 			iter.remove();
 		}
+		
+	
 
 	 	double idf_val = Math.log(getURLSetSize(term) / num);
 	 	return idf_val;
 	}
-
-
-
 
 	/**
 	 * Looks up a term and returns a map from URL to count.
@@ -116,11 +118,11 @@ public class JedisIndex {
 	 * @param term
 	 * @return Map from URL to count.
 	 */
-	public Map<String, Double> getCounts(String term) {
-		Map<String, Double> map = new HashMap<String, Double>();
+	public Map<String, Integer> getCounts(String term) {
+		Map<String, Integer> map = new HashMap<String, Integer>();
 		Set<String> urls = getURLs(term);
 		for (String url: urls) {
-			Double count = getCount(url, term);
+			Integer count = getCount(url, term);
 			map.put(url, count);
 		}
 		return map;
@@ -132,7 +134,7 @@ public class JedisIndex {
 	 * @param term
 	 * @return Map from URL to count.
 	 */
-	public Map<String, Double> getCountsFaster(String term) {
+	public Map<String, Integer> getCountsFaster(String term) {
 		// convert the set of strings to a list so we get the
 		// same traversal order every time
 		List<String> urls = new ArrayList<String>();
@@ -147,15 +149,16 @@ public class JedisIndex {
 		List<Object> res = t.exec();
 
 		// iterate the results and make the map
-		Map<String, Double> map = new HashMap<String, Double>();
+		Map<String, Integer> map = new HashMap<String, Integer>();
 		int i = 0;
 		for (String url: urls) {
 			System.out.println(url);
-			Double count = new Double((String) res.get(i++));
+			Integer count = new Integer((String) res.get(i++));
 			map.put(url, count);
 		}
 		return map;
 	}
+     
 
 	/**
 	 * Returns the number of times the given term appears at the given URL.
@@ -164,10 +167,16 @@ public class JedisIndex {
 	 * @param term
 	 * @return
 	 */
-	public Double getCount(String url, String term) {
+	public Integer getCount(String url, String term) {
 		String redisKey = termCounterKey(url);
 		String count = jedis.hget(redisKey, term);
-		return new Double(count);
+                try{
+                    return new Integer(count);
+                }
+		catch (Exception e){
+                    Double d = Double.parseDouble(count);
+                    return d.intValue();
+                }
 	}
 
 	/**
@@ -205,7 +214,7 @@ public class JedisIndex {
 		// for each term, add an entry in the termcounter and a new
 		// member of the index
 		for (String term: tc.keySet()) {
-			Double count = tc.get(term);
+			Integer count = tc.get(term);
 			t.hset(hashname, term, count.toString());
 			t.sadd(urlSetKey(term), url);
 		}
@@ -226,7 +235,7 @@ public class JedisIndex {
 			// for each term, print the pages where it appears
 			Set<String> urls = getURLs(term);
 			for (String url: urls) {
-				Double count = getCount(url, term);
+				Integer count = getCount(url, term);
 				System.out.println("    " + url + " " + count);
 			}
 		}
@@ -336,8 +345,8 @@ public class JedisIndex {
 		//index.deleteAllKeys();
 		loadIndex(index);
 
-		Map<String, Double> map = index.getCountsFaster("the");
-		for (Entry<String, Double> entry: map.entrySet()) {
+		Map<String, Integer> map = index.getCountsFaster("the");
+		for (Entry<String, Integer> entry: map.entrySet()) {
 			System.out.println(entry);
 		}
 	}
