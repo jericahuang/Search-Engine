@@ -19,21 +19,43 @@ body{
 .sneakPeak{
     color:#999;
     margin-top:5px;
+    margin-bottom:3px;
     padding-left:20px;
-    font-size:15px;
+    font-size:13px;
 }
 
 .strong{
     font-weight:700;
 }
 
+.helper {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.imgContainer{
+    width:150px;
+    height:150px;
+    background-color:#f9f9f9;
+    text-align: center;
+}
+
+.wikiImg{
+    max-width:120px;
+    max-height:120px;
+    margin:auto;
+    vertical-align: middle;
+}
+
 table#results{
     padding:2% 4%;
+    padding-top:1%;
 }
 
 table#results tr{
     display:block;
-    margin:45px 0px;
+    margin:20px 0px;
 }
 
 table#results tr:first-child{
