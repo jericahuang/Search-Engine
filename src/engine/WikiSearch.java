@@ -1,6 +1,7 @@
 package engine;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +11,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import redis.clients.jedis.Jedis;
+
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 
 
 /**
@@ -46,11 +52,9 @@ public class WikiSearch {
 	 *
 	 * @param map
 	 */
-	private  void print() {
+	public List<Entry<String, Integer>> print() {
 		List<Entry<String, Integer>> entries = sort();
-		for (Entry<String, Integer> entry: entries) {
-			System.out.println(entry);
-		}
+		return entries;
 	}
 
 	/**
@@ -136,6 +140,50 @@ public class WikiSearch {
 		Collections.sort(entries, comparator);
 		return entries;
 	}
+        
+        
+        /**
+	 * Returns a list of HTML renditions of the search results
+	 *
+	 * @return
+	 */
+        public List<String> searchToHtml() throws IOException{
+            List<String> fullHtml = new ArrayList<String>();
+            
+            WikiFetcher wf = new WikiFetcher();
+            
+            for (String wikiUrl : this.map.keySet()){
+                
+                String imgurl = wf.fetchImgUrl(wikiUrl);
+                String firstParagraph = wf.fetchWikipedia(wikiUrl).first().text();
+                
+                String markup="<tr>\n" +
+"                <td class=\"resultContent\">\n" +
+"                    <a href=\""+wikiUrl+"\" target = \"blank\">"+wf.fetchTitle(wikiUrl)+"</a>\n" +
+"                    <div class=\"sneakPeak\">\n" +
+"                        <div class=\"wikiLink\">"+wikiUrl.substring(0,wikiUrl.lastIndexOf("/"))+"/<span class=\"strong\">"+wikiUrl.substring(wikiUrl.lastIndexOf("/")+1)+"</span></div>\n" +
+"                         " +firstParagraph.substring(0,Math.min(firstParagraph.length(),250))+"..."+
+"                    </div>\n" +
+"                </td><td>";
+                
+                if (imgurl!=""){
+                    markup+="<div class=\"imgContainer\">\n" +
+"                        <span class=\"helper\"></span><img class=\"wikiImg\" src=\""+imgurl+"\">\n" +
+"                    </div>\n" +
+"                </td>\n" +
+"            </tr>";
+                }
+                else{
+                    markup+="</td></tr>";
+                }               
+                
+                fullHtml.add(markup);
+            }
+            
+            return fullHtml;
+        }
+
+                   
 
 
 	/**

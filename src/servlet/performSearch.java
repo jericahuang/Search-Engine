@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import engine.WikiSearch;
 import static engine.WikiSearch.search;
+import java.util.List;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -68,7 +69,7 @@ public class performSearch extends HttpServlet {
     }
     
     
-    public long startTime = System.currentTimeMillis();
+    
     /**
      * Handles the HTTP <code>POST</code> method.
      *
@@ -81,11 +82,13 @@ public class performSearch extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        long startTime = System.currentTimeMillis();
+        
         response.setContentType("text/html; charset=UTF-8");
         PrintWriter out = response.getWriter();
         String query = request.getParameter("searchInput");
         
-        out.print("<!DOCTYPE html><html><head><title>Hooli Search</title><link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>\n" +
+        out.print("<!DOCTYPE html><html><head><title>Hooli Search</title><link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>\n" +
 "        <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>\n" +
 "        <link rel=\"stylesheet\" href=\"styles.css\" type=\"text/css\">\n" +
 "        <meta charset=\"UTF-8\">\n" +
@@ -98,20 +101,32 @@ public class performSearch extends HttpServlet {
 "            <form action=\"performSearch\" method=\"POST\" id=\"secondSearch\">\n" +
 "                <input type=\"text\" name=\"searchInput\" id=\"searchInput\" value=\""+query+"\"> \n" +
 "                <input type=\"submit\" value=\"Search\">\n" +
-"            </form><hr>");
-        double finalTime = (System.currentTimeMillis() - startTime)/1000.0;
-        out.println("Search results for " + query+" ("+finalTime+" seconds)<br><br>");
-        try{
-            Jedis jedis = JedisMaker.make();
-            JedisIndex index = new JedisIndex(jedis);
+"            </form><hr></div>");
+        Jedis jedis = JedisMaker.make();
+        JedisIndex index = new JedisIndex(jedis);
 
-            WikiSearch search1 = search(query, index);
-            out.println(search1.print());
-        }
-        finally{
-            out.print("</div></body></html>");
-            out.close();
-        }
+        WikiSearch search = search(query, index);
+        
+        List<String> results = search.searchToHtml(); 
+        
+        double finalTime = (System.currentTimeMillis() - startTime)/1000.0;
+        out.println("<p id=\"stats\">"+results.size()+" results for <span class='strong'>"+query+"</span> ("+finalTime+" seconds)</p><table id=\"results\">");
+          
+        
+        
+        //out.println(search.print());
+        
+        for (String markup : search.searchToHtml()){
+                out.print(markup);
+            }
+        
+        
+        out.print("</table></div></body></html>");
+            
+        
+        
+        out.close();
+        
     }
     
     
