@@ -82,26 +82,33 @@ public class JedisIndex {
 	}
 
 	public Double getURLSetSize(String term) {
-		double setSize = (double) jedis.scard(term);
+		double setSize = (double) jedis.scard(urlSetKey(term));
 		return setSize;
 	}
 	
+	
 	public double idf(String term) {
 		double num = 0;
-		//TODO: update num value
-		/*for (List<String> page : pages) {
-    		for (String t : page) {
-    	    		if (term.equalsIgnoreCase(t)) {
-            			num++;
-            			break;
-        			}
- 	    		}
-	 	}*/
+		
+		/*Set<String> termURLs = getURLs(term);
+		for (String url: termURLs){
+			num = num + getCount(url, term);
+		}*/
+		
+		Map<String, Integer> urlMap = getCounts(term);
+		Iterator iter = urlMap.entrySet().iterator();
+		while (iter.hasNext()){
+			Map.Entry kv = (Map.Entry)iter.next();
+			double val = (Double) kv.getValue();
+			num = num + val;
+			iter.remove();
+		}
+		
+	
 
 	 	double idf_val = Math.log(getURLSetSize(term) / num);
 	 	return idf_val;
 	}
-
 
 
 
