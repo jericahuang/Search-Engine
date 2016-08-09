@@ -2,12 +2,21 @@ package engine;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
+
+import edu.stanford.nlp.ling.CoreAnnotations.*;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
+import plaintext_processor.CoreProcessor;
+import plaintext_processor.TextProcessor;
 
 
 /**
@@ -75,8 +84,10 @@ public class TermCounter {
 	 * @param text  The text to process.
 	 */
 	public void processText(String text) {
+		TextProcessor test = new CoreProcessor();
+
 		// replace punctuation with spaces, convert to lower case, and split on whitespace
-		String[] array = text.replaceAll("\\pP", " ").toLowerCase().split("\\s+");
+		String[] array = test.process(text).replaceAll("\\pP", " ").toLowerCase().split("\\s+");
 
 		for (int i=0; i<array.length; i++) {
 			String term = array[i];
@@ -138,11 +149,12 @@ public class TermCounter {
 
 	public double tf(List<String> page, String term) {
    		double val = 0;
-    		for (String t : page) {
+
+   			for (String t : page) {
        		if (term.equalsIgnoreCase(t))
         		val++;
 	    	}
-	    	tf_val = val / page.size();
+	    	double tf_val = val / page.size();
     		return tf_val;
 	}
 
@@ -154,10 +166,10 @@ public class TermCounter {
                 			num++;
                 			break;
             			}
-     	    		}	
+     	    		}
    	 	}
 
-   	 	double idf_val = Math.log(pages.size() / n);
+   	 	double idf_val = Math.log(pages.size() / num);
    	 	return idf_val;
 	}
 

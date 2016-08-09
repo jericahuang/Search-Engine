@@ -4,7 +4,7 @@ public class Driver {
 
 	public static void main(String [] args) {
 
-		String query = "What is Khaled Mohamed Khaled?";
+		String query = "What is United States";
 
 
 		QuestionProcessor qp = new QuestionProcessor();

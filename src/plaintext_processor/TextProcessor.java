@@ -6,7 +6,7 @@ package plaintext_processor;
 /**
  * An interface that preprocesses a user's category_classifier query that allows multiple
  * types of processing algorithms to be implemented underneath.
- * 
+ *
  * @author data
  *
  */
@@ -14,7 +14,7 @@ package plaintext_processor;
 public interface TextProcessor {
 	/**
 	 * Processes the user's query by lemmatizing & removing stopwords.
-	 * 
+	 *
 	 * @param query
 	 *            is the user's original category_classifier
 	 * @return the user's processed category_classifier
@@ -24,7 +24,7 @@ public interface TextProcessor {
 	/**
 	 * Processes the given document and creates an annotated document that
 	 * contains POSTagging, Lemmas, and whether word is StopWord
-	 * 
+	 *
 	 * @param document
 	 *            the document to be processed
 	 * @return whether processing successful
@@ -33,7 +33,7 @@ public interface TextProcessor {
 
 	/**
 	 * Lemmatizes the user's category_classifier.
-	 * 
+	 *
 	 * @param query
 	 *            is the user's original category_classifier
 	 * @return the user's stemmed category_classifier
@@ -43,7 +43,7 @@ public interface TextProcessor {
 	/**
 	 * Lemmatizes the given document and creates an annotated document that
 	 * contains POSTagging & Lemmas for the words
-	 * 
+	 *
 	 * @param string
 	 *            the document to be processed
 	 * @return whether lemmatization successful
@@ -52,7 +52,7 @@ public interface TextProcessor {
 
 	/**
 	 * removes stop words in user's category_classifier
-	 * 
+	 *
 	 * @param query
 	 *            the user's original category_classifier
 	 * @return the user's stemmed category_classifier
