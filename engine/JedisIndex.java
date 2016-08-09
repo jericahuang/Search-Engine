@@ -81,6 +81,31 @@ public class JedisIndex {
 		return set;
 	}
 
+	public Double getURLSetSize(String term) {
+		double setSize = (double) jedis.scard(term);
+		return setSize;
+	}
+	
+	public double idf(String term) {
+		double num = 0;
+		//TODO: update num value
+		/*for (List<String> page : pages) {
+    		for (String t : page) {
+    	    		if (term.equalsIgnoreCase(t)) {
+            			num++;
+            			break;
+        			}
+ 	    		}
+	 	}*/
+
+	 	double idf_val = Math.log(getURLSetSize(term) / num);
+	 	return idf_val;
+	}
+
+
+
+
+
 	/**
 	 * Looks up a term and returns a map from URL to count.
 	 *
