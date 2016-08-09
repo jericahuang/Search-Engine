@@ -135,6 +135,33 @@ public class TermCounter {
 		System.out.println("Total of all counts = " + size());
 	}
 
+
+	public double tf(List<String> page, String term) {
+   		double val = 0;
+    		for (String t : page) {
+       		if (term.equalsIgnoreCase(t))
+        		val++;
+	    	}
+	    	tf_val = val / page.size();
+    		return tf_val;
+	}
+
+	public double idf(List<List<String>> pages, String term) {
+    		double num = 0;
+    		for (List<String> page : pages) {
+        		for (String t : page) {
+        	    		if (term.equalsIgnoreCase(t)) {
+                			num++;
+                			break;
+            			}
+     	    		}	
+   	 	}
+
+   	 	double idf_val = Math.log(pages.size() / n);
+   	 	return idf_val;
+	}
+
+
 	/**
 	 * @param args
 	 * @throws IOException
