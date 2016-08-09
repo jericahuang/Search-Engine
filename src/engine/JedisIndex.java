@@ -81,6 +81,38 @@ public class JedisIndex {
 		return set;
 	}
 
+	public Double getURLSetSize(String term) {
+		double setSize = (double) jedis.scard(urlSetKey(term));
+		return setSize;
+	}
+	
+	
+	public double idf(String term) {
+		double num = 0;
+		
+		/*Set<String> termURLs = getURLs(term);
+		for (String url: termURLs){
+			num = num + getCount(url, term);
+		}*/
+		
+		Map<String, Integer> urlMap = getCounts(term);
+		Iterator iter = urlMap.entrySet().iterator();
+		while (iter.hasNext()){
+			Map.Entry kv = (Map.Entry)iter.next();
+			double val = (Double) kv.getValue();
+			num = num + val;
+			iter.remove();
+		}
+		
+	
+
+	 	double idf_val = Math.log(getURLSetSize(term) / num);
+	 	return idf_val;
+	}
+
+
+
+
 	/**
 	 * Looks up a term and returns a map from URL to count.
 	 *
