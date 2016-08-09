@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -15,7 +17,7 @@ import org.jsoup.select.Elements;
 public class WikiFetcher {
 	private long lastRequestTime = -1;
 	private long minInterval = 1000;
-
+                
 	/**
 	 * Fetches and parses a URL string, returning a list of paragraph elements.
 	 *
@@ -37,32 +39,39 @@ public class WikiFetcher {
 		Elements paras = content.select("p");
 		return paras;
 	}
+        
+        public Map<String, String> fetchWebAssets(String url) throws IOException{
 
+            HashMap<String, String> HtmlAssets=new HashMap<String, String>();
+            
+            Connection conn = Jsoup.connect(url);
+            Document doc = conn.get();
+            
+            //title
+            HtmlAssets.put("title", doc.title());
+            
+            //1st paragraph
+            String para = doc.getElementById("mw-content-text").select("p").first().text().replaceAll("\\[(.*?)\\]", "");
+            HtmlAssets.put("para", para);
+            
+            //image url
+            try{
+                    HtmlAssets.put("imgUrl", doc.getElementsByClass("infobox").select("img").first().absUrl("src"));
+                }
+                catch (Exception e1){
+                    try{
+                        HtmlAssets.put("imgUrl",  doc.getElementsByClass("thumbinner").select("img").first().absUrl("src"));
+                    }
+                    catch(Exception e2){
+                    }
+                }
+           
+            
+            return HtmlAssets;
+                
+        }
 
-	public String fetchTitle(String url) throws IOException {
-		Connection conn = Jsoup.connect(url);
-		Document doc = conn.get();
-
-		return doc.title();
-	}
-
-	public String fetchImgUrl(String url) throws IOException {
-		Connection conn = Jsoup.connect(url);
-		Document doc = conn.get();
-		try{
-			return doc.getElementsByClass("infobox").select("img").first().absUrl("src");
-		}
-		catch (Exception e){
-			try{
-				return doc.getElementsByClass("thumb").select("img").first().absUrl("src");
-			}
-			catch(Exception f){
-				return "";
-			}
-
-		}
-
-	}
+        
 
 	/**
 	 * Reads the contents of a Wikipedia page from src/resources.

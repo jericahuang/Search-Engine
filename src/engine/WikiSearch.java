@@ -12,6 +12,11 @@ import java.util.Map.Entry;
 
 import redis.clients.jedis.Jedis;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
+
 
 /**
  * Represents the results of a search query.
@@ -20,15 +25,15 @@ import redis.clients.jedis.Jedis;
 public class WikiSearch {
 
 	// map from URLs that contain the term(s) to relevance score
-	private Map<String, Double> map;
+	private Map<String, Integer> map;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param union
+	 * @param map
 	 */
-	public WikiSearch(Map<String, Double> union) {
-		this.map = union;
+	public WikiSearch(Map<String, Integer> map) {
+		this.map = map;
 	}
 
 	/**
@@ -37,8 +42,8 @@ public class WikiSearch {
 	 * @param url
 	 * @return
 	 */
-	public Double getRelevance(String url) {
-		Double relevance = map.get(url);
+	public Integer getRelevance(String url) {
+		Integer relevance = map.get(url);
 		return relevance==null ? 0: relevance;
 	}
 
@@ -47,11 +52,9 @@ public class WikiSearch {
 	 *
 	 * @param map
 	 */
-	private  void print() {
-		List<Entry<String, Double>> entries = sort();
-		for (Entry<String, Double> entry: entries) {
-			System.out.println(entry);
-		}
+	public List<Entry<String, Integer>> print() {
+		List<Entry<String, Integer>> entries = sort();
+		return entries;
 	}
 
 	/**
@@ -61,9 +64,9 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-		Map<String, Double> union = new HashMap<String, Double>(map);
+		Map<String, Integer> union = new HashMap<String, Integer>(map);
 		for (String term: that.map.keySet()) {
-			double relevance = totalRelevance(this.getRelevance(term), that.getRelevance(term));
+			int relevance = totalRelevance(this.getRelevance(term), that.getRelevance(term));
 			union.put(term, relevance);
 		}
 		return new WikiSearch(union);
@@ -76,10 +79,10 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch and(WikiSearch that) {
-		Map<String, Double> intersection = new HashMap<String, Double>();
+		Map<String, Integer> intersection = new HashMap<String, Integer>();
 		for (String term: map.keySet()) {
 			if (that.map.containsKey(term)) {
-				double relevance = totalRelevance(this.map.get(term), that.map.get(term));
+				int relevance = totalRelevance(this.map.get(term), that.map.get(term));
 				intersection.put(term, relevance);
 			}
 		}
@@ -93,7 +96,7 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-		Map<String, Double> difference = new HashMap<String, Double>(map);
+		Map<String, Integer> difference = new HashMap<String, Integer>(map);
 		for (String term: that.map.keySet()) {
 			difference.remove(term);
 		}
@@ -107,9 +110,9 @@ public class WikiSearch {
 	 * @param rel2: relevance score for the second search
 	 * @return
 	 */
-	protected double totalRelevance(Double double1, Double double2) {
+	protected int totalRelevance(Integer rel1, Integer rel2) {
 		// simple starting place: relevance is the sum of the term frequencies.
-		return double1 + double2;
+		return rel1 + rel2;
 	}
 
 	/**
@@ -117,18 +120,18 @@ public class WikiSearch {
 	 *
 	 * @return List of entries with URL and relevance.
 	 */
-	public List<Entry<String, Double>> sort() {
+	public List<Entry<String, Integer>> sort() {
 		// NOTE: this can be done more concisely in Java 8.  See
 		// http://stackoverflow.com/questions/109383/sort-a-mapkey-value-by-values-java
 
 		// make a list of entries
-		List<Entry<String, Double>> entries =
-				new LinkedList<Entry<String, Double>>(map.entrySet());
+		List<Entry<String, Integer>> entries =
+				new LinkedList<Entry<String, Integer>>(map.entrySet());
 
 		// make a Comparator object for sorting
-		Comparator<Entry<String, Double>> comparator = new Comparator<Entry<String, Double>>() {
+		Comparator<Entry<String, Integer>> comparator = new Comparator<Entry<String, Integer>>() {
             @Override
-            public int compare(Entry<String, Double> e1, Entry<String, Double> e2) {
+            public int compare(Entry<String, Integer> e1, Entry<String, Integer> e2) {
                 return e1.getValue().compareTo(e2.getValue());
             }
         };
@@ -137,47 +140,52 @@ public class WikiSearch {
 		Collections.sort(entries, comparator);
 		return entries;
 	}
-
-    /**
- * Returns a list of HTML renditions of the search results
- *
- * @return
- */
-    public List<String> searchToHtml() throws IOException{
-        List<String> fullHtml = new ArrayList<String>();
-
-        WikiFetcher wf = new WikiFetcher();
-
-        for (String wikiUrl : this.map.keySet()){
-
-            String imgurl = wf.fetchImgUrl(wikiUrl);
-            String firstParagraph = wf.fetchWikipedia(wikiUrl).first().text();
-
-            String markup="<tr>\n" +
+        
+        
+        /**
+	 * Returns a list of HTML renditions of the search results
+	 *
+	 * @return
+	 */
+        public List<String> searchToHtml() throws IOException{
+            List<String> fullHtml = new ArrayList<String>();
+            
+            WikiFetcher wf = new WikiFetcher();
+            
+            for (String wikiUrl : this.map.keySet()){
+                
+                Map<String, String> assets = wf.fetchWebAssets(wikiUrl);
+                
+                String firstParagraph = assets.get("para");
+                
+                String markup="<tr>\n" +
 "                <td class=\"resultContent\">\n" +
-"                    <a href=\""+wikiUrl+"\" target = \"blank\">"+wf.fetchTitle(wikiUrl)+"</a>\n" +
+"                    <a href=\""+wikiUrl+"\" target = \"blank\">"+assets.get("title")+"</a>\n" +
 "                    <div class=\"sneakPeak\">\n" +
 "                        <div class=\"wikiLink\">"+wikiUrl.substring(0,wikiUrl.lastIndexOf("/"))+"/<span class=\"strong\">"+wikiUrl.substring(wikiUrl.lastIndexOf("/")+1)+"</span></div>\n" +
-"                         " +firstParagraph.substring(0,Math.min(firstParagraph.length(),250))+"..."+
+"                         " +firstParagraph.substring(0,Math.min(firstParagraph.length(),320))+"..."+
 "                    </div>\n" +
 "                </td><td>";
-
-            if (imgurl!=""){
-                markup+="<div class=\"imgContainer\">\n" +
-"                        <span class=\"helper\"></span><img class=\"wikiImg\" src=\""+imgurl+"\">\n" +
+                
+                if (assets.containsKey("imgUrl")){
+                    markup+="<div class=\"imgContainer\">\n" +
+"                        <span class=\"helper\"></span><img class=\"wikiImg\" src=\""+assets.get("imgUrl")+"\">\n" +
 "                    </div>\n" +
 "                </td>\n" +
 "            </tr>";
+                }
+                else{
+                    markup+="</td></tr>";
+                }               
+                
+                fullHtml.add(markup);
             }
-            else{
-                markup+="</td></tr>";
-            }
-
-            fullHtml.add(markup);
+            
+            return fullHtml;
         }
 
-        return fullHtml;
-    }
+                   
+
 
 	/**
 	 * Performs a search and makes a WikiSearch object.
@@ -187,7 +195,7 @@ public class WikiSearch {
 	 * @return
 	 */
 	public static WikiSearch search(String term, JedisIndex index) {
-		Map<String, Double> map = index.getCounts(term);
+		Map<String, Integer> map = index.getCounts(term);
 		return new WikiSearch(map);
 	}
 
