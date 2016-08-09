@@ -4,8 +4,7 @@ public class Driver {
 
 	public static void main(String [] args) {
 
-		String query = "What is United States";
-
+		String query = "What is Vietnam War?";
 
 		QuestionProcessor qp = new QuestionProcessor();
 
@@ -13,8 +12,6 @@ public class Driver {
 		qp.print();
 
 		System.out.println(answer);
-
-
 
 	}
 }

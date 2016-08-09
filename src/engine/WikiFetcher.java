@@ -37,33 +37,32 @@ public class WikiFetcher {
 		Elements paras = content.select("p");
 		return paras;
 	}
-        
-        
-        public String fetchTitle(String url) throws IOException {
+
+
+	public String fetchTitle(String url) throws IOException {
 		Connection conn = Jsoup.connect(url);
 		Document doc = conn.get();
 
 		return doc.title();
-        }
-        
-        public String fetchImgUrl(String url) throws IOException {
+	}
+
+	public String fetchImgUrl(String url) throws IOException {
 		Connection conn = Jsoup.connect(url);
 		Document doc = conn.get();
-                try{
-                    return doc.getElementsByClass("infobox").select("img").first().absUrl("src");
-                }
-                catch (Exception e){
-                    try{
-                        return doc.getElementsByClass("thumb").select("img").first().absUrl("src");
-                    }
-                    catch(Exception f){
-                        return "";
-                    }
-                    
-                }
+		try{
+			return doc.getElementsByClass("infobox").select("img").first().absUrl("src");
+		}
+		catch (Exception e){
+			try{
+				return doc.getElementsByClass("thumb").select("img").first().absUrl("src");
+			}
+			catch(Exception f){
+				return "";
+			}
 
-        }
-        
+		}
+
+	}
 
 	/**
 	 * Reads the contents of a Wikipedia page from src/resources.

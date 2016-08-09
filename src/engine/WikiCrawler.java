@@ -124,8 +124,8 @@ public class WikiCrawler {
 			res = wc.crawl(false);
 		} while (res == null);
 
-		Map<String, Integer> map = index.getCounts("the");
-		for (Entry<String, Integer> entry: map.entrySet()) {
+		Map<String, Double> map = index.getCounts("the");
+		for (Entry<String, Double> entry: map.entrySet()) {
 			System.out.println(entry);
 		}
 	}

@@ -25,16 +25,20 @@ import plaintext_processor.TextProcessor;
  * @author downey
  *
  */
-public class TermCounter {
+public class Term {
 
-	private Map<String, Double> map;
+	private Map<String, Integer> frequencies;
 	private Map<String, Double> tfVal;
 	private String label;
 
-	public TermCounter(String label) {
+	public Term(String label) {
 		this.label = label;
-		this.map = new HashMap<String, Double>();
+		this.frequencies = new HashMap<String, Integer>();
 		this.tfVal = new HashMap<String, Double>();
+	}
+
+	public double getTfVal(String term) {
+		return tfVal.get(term);
 	}
 
 	public String getLabel() {
@@ -48,7 +52,7 @@ public class TermCounter {
 	 */
 	public int size() {
 		int total = 0;
-		for (Double value: map.values()) {
+		for (Integer value: frequencies.values()) {
 			total += value;
 		}
 		return total;
@@ -95,14 +99,6 @@ public class TermCounter {
 			String term = array[i];
 			incrementTermCount(term);
 		}
-
-		for (String term : keySet()) {
-			Double count = map.get(term);
-
-			this.tfVal.put(term, ((double) count)/array.length);
-
-
-		}
 	}
 
 	/**
@@ -119,16 +115,10 @@ public class TermCounter {
 	 * Adds a term to the map with a given count.
 	 *
 	 * @param term
-	 * @param d
+	 * @param count
 	 */
-	public void put(String term, double d) {
-		map.put(term, d);
-	}
-
-	public double getTfVal(String term) {
-		//return tfVal.get(term);
-		Double count = map.get(term);
-		return count == null ? 0 : count;
+	public void put(String term, int count) {
+		frequencies.put(term, count);
 	}
 
 	/**
@@ -137,8 +127,8 @@ public class TermCounter {
 	 * @param term
 	 * @return
 	 */
-	public Double get(String term) {
-		Double count = map.get(term);
+	public Integer get(String term) {
+		Integer count = frequencies.get(term);
 		return count == null ? 0 : count;
 	}
 
@@ -148,7 +138,7 @@ public class TermCounter {
 	 * @return
 	 */
 	public Set<String> keySet() {
-		return map.keySet();
+		return frequencies.keySet();
 	}
 
 	/**
@@ -156,44 +146,37 @@ public class TermCounter {
 	 */
 	public void printCounts() {
 		for (String key: keySet()) {
-			Double count = get(key);
+			Integer count = get(key);
 			System.out.println(key + ", " + count);
 		}
 		System.out.println("Total of all counts = " + size());
-		System.out.println();
-
-		for (String key : tfVal.keySet()) {
-			System.out.println(key + " " + tfVal.get(key));
-		}
-		System.out.println(tfVal.size());
 	}
-
 
 
 	public double tf(List<String> page, String term) {
-		double val = 0;
+   		double val = 0;
 
-		for (String t : page) {
-			if (term.equalsIgnoreCase(t))
-				val++;
-		}
-		double tf_val = val / page.size();
-		return tf_val;
+   			for (String t : page) {
+       		if (term.equalsIgnoreCase(t))
+        		val++;
+	    	}
+	    	double tf_val = val / page.size();
+    		return tf_val;
 	}
 
 	public double idf(List<List<String>> pages, String term) {
-		double num = 0;
-		for (List<String> page : pages) {
-			for (String t : page) {
-				if (term.equalsIgnoreCase(t)) {
-					num++;
-					break;
-				}
-			}
-		}
+    		double num = 0;
+    		for (List<String> page : pages) {
+        		for (String t : page) {
+        	    		if (term.equalsIgnoreCase(t)) {
+                			num++;
+                			break;
+            			}
+     	    		}
+   	 	}
 
-		double idf_val = Math.log(pages.size() / num);
-		return idf_val;
+   	 	double idf_val = Math.log(pages.size() / num);
+   	 	return idf_val;
 	}
 
 
@@ -207,7 +190,7 @@ public class TermCounter {
 		WikiFetcher wf = new WikiFetcher();
 		Elements paragraphs = wf.fetchWikipedia(url);
 
-		TermCounter counter = new TermCounter(url.toString());
+		Term counter = new Term(url.toString());
 		counter.processElements(paragraphs);
 		counter.printCounts();
 	}
