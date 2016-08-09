@@ -35,15 +35,15 @@ body{
 }
 
 .imgContainer{
-    width:150px;
-    height:150px;
+    width:122px;
+    height:122px;
     background-color:#f9f9f9;
     text-align: center;
 }
 
 .wikiImg{
-    max-width:120px;
-    max-height:120px;
+    max-width:115px;
+    max-height:115px;
     margin:auto;
     vertical-align: middle;
 }
@@ -55,7 +55,7 @@ table#results{
 
 table#results tr{
     display:block;
-    margin:20px 0px;
+    margin-bottom:20px;
 }
 
 table#results tr:first-child{

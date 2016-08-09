@@ -95,7 +95,7 @@ public class performSearch extends HttpServlet {
 "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"favicon.ico\" rel=\"icon\" type=\"image/x-icon\" />\n" +
 "        <link href=\"favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\">\n" +
 "    </head>\n" +
-"    <body>"+"<div id=\"resultContainer\">\n" +
+"    <body>"+"<div id=\"headerContainer\">\n" +
 "            <a href=\"index.html\" id=\"smallLogo\"><span class=\"blue\">H</span><span class=\"red\">o</span><span class=\"yellow\">o</span><span class=\"green\">l</span><span class=\"blue\">i</span></a>\n" +
 "\n" +
 "            <form action=\"performSearch\" method=\"POST\" id=\"secondSearch\">\n" +
