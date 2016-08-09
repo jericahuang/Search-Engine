@@ -81,7 +81,8 @@ public class JedisIndex {
 		return set;
 	}
 
-	public Double getURLSetSize(String term) {
+
+        public Double getURLSetSize(String term) {
 		double setSize = (double) jedis.scard(urlSetKey(term));
 		return setSize;
 	}
@@ -109,9 +110,6 @@ public class JedisIndex {
 	 	double idf_val = Math.log(getURLSetSize(term) / num);
 	 	return idf_val;
 	}
-
-
-
 
 	/**
 	 * Looks up a term and returns a map from URL to count.
@@ -159,6 +157,7 @@ public class JedisIndex {
 		}
 		return map;
 	}
+     
 
 	/**
 	 * Returns the number of times the given term appears at the given URL.
@@ -170,7 +169,13 @@ public class JedisIndex {
 	public Integer getCount(String url, String term) {
 		String redisKey = termCounterKey(url);
 		String count = jedis.hget(redisKey, term);
-		return new Integer(count);
+                try{
+                    return new Integer(count);
+                }
+		catch (Exception e){
+                    Double d = Double.parseDouble(count);
+                    return d.intValue();
+                }
 	}
 
 	/**
