@@ -56,7 +56,11 @@ public class WikiFetcher {
             
             //image url
             try{
-                    HtmlAssets.put("imgUrl", doc.getElementsByClass("infobox").select("img").first().absUrl("src"));
+                    String s = doc.getElementsByClass("infobox").select("img").first().absUrl("src");
+                    if (s.equals("https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Wikibooks-logo-en-noslogan.svg/16px-Wikibooks-logo-en-noslogan.svg.png")){
+                        throw new Exception();  
+                    }
+                    HtmlAssets.put("imgUrl", s);
                 }
                 catch (Exception e1){
                     try{

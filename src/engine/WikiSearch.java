@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Stack;
 
 import redis.clients.jedis.Jedis;
 
@@ -147,14 +148,15 @@ public class WikiSearch {
 	 *
 	 * @return
 	 */
-        public List<String> searchToHtml() throws IOException{
-            List<String> fullHtml = new ArrayList<String>();
+        public Stack<String> searchToHtml() throws IOException{
+            Stack<String> fullHtml = new Stack<String>();
             
             WikiFetcher wf = new WikiFetcher();
             
             for (String wikiUrl : this.map.keySet()){
                 
                 Map<String, String> assets = wf.fetchWebAssets(wikiUrl);
+                System.out.println(assets);
                 
                 String firstParagraph = assets.get("para");
                 
@@ -178,7 +180,7 @@ public class WikiSearch {
                     markup+="</td></tr>";
                 }               
                 
-                fullHtml.add(markup);
+                fullHtml.push(markup);
             }
             
             return fullHtml;

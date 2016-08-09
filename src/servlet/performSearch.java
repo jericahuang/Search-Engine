@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import engine.WikiSearch;
 import static engine.WikiSearch.search;
 import java.util.List;
+import java.util.Stack;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -107,18 +108,15 @@ public class performSearch extends HttpServlet {
 
         WikiSearch search = search(query, index);
         
-        List<String> results = search.searchToHtml(); 
+        Stack<String> results = search.searchToHtml(); 
         
         double finalTime = (System.currentTimeMillis() - startTime)/1000.0;
-        out.println("<p id=\"stats\">"+results.size()+" results for <span class='strong'>"+query+"</span> ("+finalTime+" seconds)</p><table id=\"results\">");
+        out.print("<p id=\"stats\">"+results.size()+" results for <span class='strong'>"+query+"</span> ("+finalTime+" seconds)</p><table id=\"results\">");
           
         
-        
-        //out.println(search.print());
-        
-        for (String markup : search.searchToHtml()){
-                out.print(markup);
-            }
+        while (!results.empty()){
+            out.print(results.pop());
+        }
         
         
         out.print("</table></div></body></html>");
