@@ -2,9 +2,11 @@ package engine;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jsoup.nodes.Element;
@@ -16,104 +18,166 @@ import redis.clients.jedis.Jedis;
 public class WikiCrawler {
 	// keeps track of where we started
 	private final String source;
-	
+
 	// the index where the results go
 	private JedisIndex index;
-	
+
+	private Jedis jedis;
+
 	// queue of URLs to be indexed
 	private Queue<String> queue = new ConcurrentLinkedQueue<String>();
-	
+
+
 	// fetcher used to get pages from Wikipedia
 	final static WikiFetcher wf = new WikiFetcher();
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param source
 	 * @param index
 	 */
-	public WikiCrawler(String source, JedisIndex index) {
+	public WikiCrawler(String source, JedisIndex index, Jedis jedis) {
 		this.source = source;
 		this.index = index;
-		queue.offer(source);
+		this.jedis = jedis;
+
+		jedis.rpush("jobQueue", source);
+		//queue.offer(source);
 	}
 
 	/**
 	 * Returns the number of URLs in the queue.
-	 * 
+	 *
 	 * @return
 	 */
-	public int queueSize() {
-		return queue.size();	
-	}
-
-	/**
-	 * Gets a URL from the queue and indexes it.
-	 * @param b 
-	 * 
-	 * @return Number of pages indexed.
-	 * @throws IOException
-	 */
-	public String crawl(boolean testing) throws IOException {
-        // FILL THIS IN!
-		//return null;
-
-		if (queue.isEmpty())
-            return null;
-
-        String link = queue.poll();     
-         
-        if (testing==false && index.isIndexed(link))
-             return null;
-   
-        Elements info;
-        if (testing) {
-            info = wf.readWikipedia(link);
-        } else {
-            info = wf.fetchWikipedia(link);
-        }
-
-        index.indexPage(link, info);
-        queueInternalLinks(info);
-        return link;
-        
-	}
-	
-	/**
-	 * Parses paragraphs and adds internal links to the queue.
-	 * 
-	 * @param paragraphs
-	 */
-	// NOTE: absence of access level modifier means package-level
-void queueInternalLinks(Elements paragraphs) {
-		for (Element p: paragraphs) {
-			Elements es = p.select("a[href]");
-
-			for (Element e: es) {
-				String linkRet = e.attr("href");
-			
-				if (linkRet.startsWith("/wiki/")) {
-
-					String linkFin = "https://en.wikipedia.org" + linkRet;
-					queue.offer(linkFin);
-			}
-		}
-		}
+	public Long queueSize() {
+		return jedis.llen("jobQueue");
 	}
 
 	public Queue<String> getQueue(){
 		return queue;
 	}
-	
-public static void main(String[] args) throws IOException {
-		
+
+	/**
+	 * Gets a URL from the queue and indexes it.
+	 * @param b
+	 *
+	 * @return Number of pages indexed.
+	 * @throws IOException
+	 */
+	public String crawl(boolean testing) throws IOException {
+		System.out.println("START");
+		if (queueSize() == 0) {
+			return null;
+		}
+
+		String url = jedis.lpop("jobQueue");
+		System.out.println("Crawling " + url);
+
+		if ((testing==false && index.isIndexed(url))) {
+			System.out.println("Already indexed.");
+			return null;
+		}
+
+		if (jedis.sismember("URLS", url) == true) {
+			System.out.println("HI");
+			return null;
+		}
+
+		Elements paragraphs;
+		if (testing) {
+			paragraphs = wf.readWikipedia(url);
+		} else {
+			paragraphs = wf.fetchWikipedia(url);
+		}
+		jedis.sadd("URLS", url);
+		index.indexPage(url, paragraphs);
+		queueInternalLinks(paragraphs);
+		return url;
+		/*
+		if (queue.isEmpty()) {
+			return null;
+		}
+		String url = queue.poll();
+		System.out.println("Crawling " + url);
+
+		if (testing==false && index.isIndexed(url)) {
+			System.out.println("Already indexed.");
+			return null;
+		}
+
+		Elements paragraphs;
+		if (testing) {
+			paragraphs = wf.readWikipedia(url);
+		} else {
+			paragraphs = wf.fetchWikipedia(url);
+		}
+		index.indexPage(url, paragraphs);
+		queueInternalLinks(paragraphs);
+		return url;
+
+		 */
+	}
+
+	/**
+	 * Parses paragraphs and adds internal links to the queue.
+	 *
+	 * @param paragraphs
+	 */
+	// NOTE: absence of access level modifier means package-level
+	void queueInternalLinks(Elements paragraphs) {
+		for (Element paragraph: paragraphs) {
+			queueInternalLinks(paragraph);
+		}
+	}
+
+	/**
+	 * Parses a paragraph and adds internal links to the queue.
+	 *
+	 * @param paragraph
+	 */
+	private void queueInternalLinks(Element paragraph) {
+		Elements elts = paragraph.select("a[href]");
+		int counter = 0;
+		for (Element elt: elts) {
+			String relURL = elt.attr("href");
+
+			if (relURL.startsWith("/wiki/")) {
+				String absURL = "https://en.wikipedia.org" + relURL;
+				//System.out.println(absURL);
+
+				System.out.println("absURL");
+				//TODO: offer to redis list
+				jedis.rpush("jobQueue", absURL);
+				counter++;
+				//queue.offer(absURL);
+			}
+		}
+		//System.out.println("LINK COUNTER " + counter);
+	}
+
+	public static void main(String[] args) throws IOException {
+		/*
+		Jedis jedis = JedisMaker.make();
+		Set<String> urls = jedis.smembers("URLS");
+		System.out.println(jedis.scard("URLS"));
+		Set<String> java = jedis.smembers("URLSet:java");
+
+		for (String url : urls) {
+			System.out.println(url);
+		}
+
+		System.out.println(jedis.llen("jobQueue"));
+
+		*/
 		// make a WikiCrawler
 		Jedis jedis = JedisMaker.make();
-		JedisIndex index = new JedisIndex(jedis); 
-		String source = "https://en.wikipedia.org/wiki/Java_(programming_language)";
-		WikiCrawler wc = new WikiCrawler(source, index);
-		
-		// for testing purposes, load up the queue
+		JedisIndex index = new JedisIndex(jedis);
+		String source = "https://en.wikipedia.org/wiki/Barack_Obama";
+		WikiCrawler wc = new WikiCrawler(source, index, jedis);
+
+		//for testing purposes, load up the queue
 		Elements paragraphs = wf.fetchWikipedia(source);
 		wc.queueInternalLinks(paragraphs);
 
@@ -121,11 +185,13 @@ public static void main(String[] args) throws IOException {
 		String res;
 		do {
 			res = wc.crawl(false);
-		} while (res == null);
-		
-		Map<String, Integer> map = index.getCounts("the");
-		for (Entry<String, Integer> entry: map.entrySet()) {
+			System.out.println("Complete");
+		} while (res != null);
+
+		Map<String, Double> map = index.getCounts("the");
+		for (Entry<String, Double> entry: map.entrySet()) {
 			System.out.println(entry);
 		}
+
 	}
 }

@@ -17,7 +17,7 @@ import org.jsoup.select.Elements;
 public class WikiFetcher {
 	private long lastRequestTime = -1;
 	private long minInterval = 1000;
-                
+
 	/**
 	 * Fetches and parses a URL string, returning a list of paragraph elements.
 	 *
@@ -39,43 +39,41 @@ public class WikiFetcher {
 		Elements paras = content.select("p");
 		return paras;
 	}
-        
-        public Map<String, String> fetchWebAssets(String url) throws IOException{
 
-            HashMap<String, String> HtmlAssets=new HashMap<String, String>();
-            
-            Connection conn = Jsoup.connect(url);
-            Document doc = conn.get();
-            
-            //title
-            HtmlAssets.put("title", doc.title());
-            
-            //1st paragraph
-            String para = doc.getElementById("mw-content-text").select("p").first().text().replaceAll("\\[(.*?)\\]", "");
-            HtmlAssets.put("para", para);
-            
-            //image url
-            try{
-                    String s = doc.getElementsByClass("infobox").select("img").first().absUrl("src");
-                    if (s.equals("https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Wikibooks-logo-en-noslogan.svg/16px-Wikibooks-logo-en-noslogan.svg.png")){
-                        throw new Exception();  
-                    }
-                    HtmlAssets.put("imgUrl", s);
-                }
-                catch (Exception e1){
-                    try{
-                        HtmlAssets.put("imgUrl",  doc.getElementsByClass("thumbinner").select("img").first().absUrl("src"));
-                    }
-                    catch(Exception e2){
-                    }
-                }
-           
-            
-            return HtmlAssets;
-                
-        }
+    public Map<String, String> fetchWebAssets(String url) throws IOException{
 
-        
+        HashMap<String, String> HtmlAssets=new HashMap<String, String>();
+
+        Connection conn = Jsoup.connect(url);
+        Document doc = conn.get();
+
+        //title
+        HtmlAssets.put("title", doc.title());
+
+        //1st paragraph
+        String para = doc.getElementById("mw-content-text").select("p").first().text().replaceAll("\\[(.*?)\\]", "");
+        HtmlAssets.put("para", para);
+
+        //image url
+        try{
+                String s = doc.getElementsByClass("infobox").select("img").first().absUrl("src");
+                if (s.equals("https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Wikibooks-logo-en-noslogan.svg/16px-Wikibooks-logo-en-noslogan.svg.png")){
+                    throw new Exception();
+                }
+                HtmlAssets.put("imgUrl", s);
+            }
+            catch (Exception e1){
+                try{
+                    HtmlAssets.put("imgUrl",  doc.getElementsByClass("thumbinner").select("img").first().absUrl("src"));
+                }
+                catch(Exception e2){
+                }
+            }
+
+
+        return HtmlAssets;
+
+    }
 
 	/**
 	 * Reads the contents of a Wikipedia page from src/resources.

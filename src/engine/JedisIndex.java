@@ -1,5 +1,4 @@
 package engine;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,8 +36,8 @@ public class JedisIndex {
 	 *
 	 * @return Redis key.
 	 */
-	private String urlSetKey(String term) {
-		return "URLSet:" + term;
+	private static String urlSetKey(String term) {
+		return "URLSet:" + term.toLowerCase();
 	}
 
 	/**
@@ -71,6 +70,12 @@ public class JedisIndex {
 		jedis.sadd(urlSetKey(term), tc.getLabel());
 	}
 
+	public Long getNumDocs() {
+		//System.out.println(jedis.scard("URL"));
+		//Set<String> s = jedis.smembers("URLS");
+		return jedis.scard("URLS");
+	}
+
 	/**
 	 * Looks up a search term and returns a set of URLs.
 	 *
@@ -79,37 +84,13 @@ public class JedisIndex {
 	 */
 	public Set<String> getURLs(String term) {
 		Set<String> set = jedis.smembers(urlSetKey(term));
+
 		return set;
 	}
 
-
-        public Double getURLSetSize(String term) {
+	public Double getURLSetSize(String term) {
 		double setSize = (double) jedis.scard(urlSetKey(term));
 		return setSize;
-	}
-	
-	
-	public double idf(String term) {
-		double num = 0;
-		
-		/*Set<String> termURLs = getURLs(term);
-		for (String url: termURLs){
-			num = num + getCount(url, term);
-		}*/
-		
-		Map<String, Integer> urlMap = getCounts(term);
-		Iterator iter = urlMap.entrySet().iterator();
-		while (iter.hasNext()){
-			Map.Entry kv = (Map.Entry)iter.next();
-			double val = (Double) kv.getValue();
-			num = num + val;
-			iter.remove();
-		}
-		
-	
-
-	 	double idf_val = Math.log(getURLSetSize(term) / num);
-	 	return idf_val;
 	}
 
 	/**
@@ -118,11 +99,11 @@ public class JedisIndex {
 	 * @param term
 	 * @return Map from URL to count.
 	 */
-	public Map<String, Integer> getCounts(String term) {
-		Map<String, Integer> map = new HashMap<String, Integer>();
+	public Map<String, Double> getCounts(String term) {
+		Map<String, Double> map = new HashMap<String, Double>();
 		Set<String> urls = getURLs(term);
 		for (String url: urls) {
-			Integer count = getCount(url, term);
+			Double count = getCount(url, term);
 			map.put(url, count);
 		}
 		return map;
@@ -134,7 +115,7 @@ public class JedisIndex {
 	 * @param term
 	 * @return Map from URL to count.
 	 */
-	public Map<String, Integer> getCountsFaster(String term) {
+	public Map<String, Double> getCountsFaster(String term) {
 		// convert the set of strings to a list so we get the
 		// same traversal order every time
 		List<String> urls = new ArrayList<String>();
@@ -144,21 +125,30 @@ public class JedisIndex {
 		Transaction t = jedis.multi();
 		for (String url: urls) {
 			String redisKey = termCounterKey(url);
+			//System.out.println(redisKey);
 			t.hget(redisKey, term);
+			//System.out.println("Counter " + t.hget(redisKey, term));
 		}
 		List<Object> res = t.exec();
 
 		// iterate the results and make the map
-		Map<String, Integer> map = new HashMap<String, Integer>();
+		Map<String, Double> map = new HashMap<String, Double>();
 		int i = 0;
 		for (String url: urls) {
-			System.out.println(url);
-			Integer count = new Integer((String) res.get(i++));
+//			System.out.println("URL " + url);
+//			System.out.println("NUMBER OF DOCUMENTS: " + getNumDocs());
+//			System.out.println(term + " " + getURLSetSize(term));
+//			System.out.println("IDF Val " + Math.log10(getNumDocs()/getURLSetSize(term)));
+
+			Double idf = Math.log10(getNumDocs()/getURLSetSize(term));
+			if (getNumDocs()/getURLSetSize(term) == 1.0) idf = Math.log10(1.000111);
+
+			Double count = (new Double((String) res.get(i++))) * (idf * Math.pow(10, 4));
+
 			map.put(url, count);
 		}
 		return map;
 	}
-     
 
 	/**
 	 * Returns the number of times the given term appears at the given URL.
@@ -167,16 +157,10 @@ public class JedisIndex {
 	 * @param term
 	 * @return
 	 */
-	public Integer getCount(String url, String term) {
+	public Double getCount(String url, String term) {
 		String redisKey = termCounterKey(url);
 		String count = jedis.hget(redisKey, term);
-                try{
-                    return new Integer(count);
-                }
-		catch (Exception e){
-                    Double d = Double.parseDouble(count);
-                    return d.intValue();
-                }
+		return new Double(count);
 	}
 
 	/**
@@ -214,7 +198,8 @@ public class JedisIndex {
 		// for each term, add an entry in the termcounter and a new
 		// member of the index
 		for (String term: tc.keySet()) {
-			Integer count = tc.get(term);
+			Double count = tc.getTfVal(term);
+			System.out.println(term + "  " + count);
 			t.hset(hashname, term, count.toString());
 			t.sadd(urlSetKey(term), url);
 		}
@@ -235,7 +220,7 @@ public class JedisIndex {
 			// for each term, print the pages where it appears
 			Set<String> urls = getURLs(term);
 			for (String url: urls) {
-				Integer count = getCount(url, term);
+				Double count = getCount(url, term);
 				System.out.println("    " + url + " " + count);
 			}
 		}
@@ -297,6 +282,7 @@ public class JedisIndex {
 		for (String key: keys) {
 			t.del(key);
 		}
+		t.del("URLS");
 		t.exec();
 	}
 
@@ -340,15 +326,24 @@ public class JedisIndex {
 		Jedis jedis = JedisMaker.make();
 		JedisIndex index = new JedisIndex(jedis);
 
-		//index.deleteTermCounters();
-		//index.deleteURLSets();
-		//index.deleteAllKeys();
+//		index.deleteTermCounters();
+//		index.deleteURLSets();
+//		index.deleteAllKeys();
 		loadIndex(index);
 
-		Map<String, Integer> map = index.getCountsFaster("the");
-		for (Entry<String, Integer> entry: map.entrySet()) {
+		Map<String, Double> map = index.getCountsFaster("the");
+		for (Entry<String, Double> entry: map.entrySet()) {
 			System.out.println(entry);
 		}
+
+
+		Set<String> set = jedis.smembers(urlSetKey("java"));
+		for (String s : set) {
+			System.out.println(s);
+		}
+
+		System.out.println(jedis.smembers("URLS").size());
+
 	}
 
 	/**
@@ -360,12 +355,15 @@ public class JedisIndex {
 	private static void loadIndex(JedisIndex index) throws IOException {
 		WikiFetcher wf = new WikiFetcher();
 
+		/*
 		String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 		Elements paragraphs = wf.readWikipedia(url);
 		index.indexPage(url, paragraphs);
 
+
 		url = "https://en.wikipedia.org/wiki/Programming_language";
 		paragraphs = wf.readWikipedia(url);
 		index.indexPage(url, paragraphs);
+		 */
 	}
 }
