@@ -1,0 +1,134 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+
+body{
+    font-family: 'Open Sans', sans-serif;
+}
+
+#container{
+    padding:10% 3%;
+}
+
+#headerContainer{
+    padding:1% 1%;
+}
+
+.sneakPeak{
+    color:#999;
+    margin-top:5px;
+    padding-left:20px;
+    font-size:15px;
+}
+
+.strong{
+    font-weight:700;
+}
+
+table#results{
+    padding:2% 4%;
+}
+
+table#results tr{
+    display:block;
+    margin:45px 0px;
+}
+
+table#results tr:first-child{
+    margin-top:0px;
+}
+
+p#stats{
+    margin-left:2%;
+    color:#999;
+}
+
+td{
+    display:inline-block;
+}
+
+td.resultContent{
+    width:55%;
+    margin-right:161px;
+}
+
+#smallLogo{
+    font-family:'Montserrat', sans-serif;
+    font-size:36px;
+    display: inline-block;
+    margin-right:30px;
+}
+
+form#secondSearch{
+    position:relative;
+    bottom:5px;
+    display: inline-block;
+    margin-bottom:20px;
+}
+
+#secondSearch input[type="text"]{
+    width:500px;
+}
+
+.wikiLink{
+    color:rgb(0,102,33);
+}
+
+
+h1{
+    text-align: center;
+    font-family:'Montserrat', sans-serif;
+    font-size:80px;
+    letter-spacing:3px;
+}
+
+a{
+    text-decoration:none;
+}
+
+span.blue{
+    color:#4285f4;
+}
+
+span.green{
+    color:#0f9d58;
+}
+
+span.yellow{
+    color:#f4b400;
+}
+
+span.red{
+    color:#db4437;
+}
+
+form#mainSearch{
+    width:410px;
+    display: block;
+    margin:auto;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+input[type="text"]{
+    width:300px;
+    padding:0 7px;
+    font-family: 'Open Sans', sans-serif;
+    height:30px;
+    font-size:14px;
+    margin-right:10px;
+}
+
+input[type=submit] {
+    padding:9px 18px; 
+    background:#4285f4; 
+    color:#fff;
+    border:0 none;
+    font-size:12px;
+    font-family: 'Open Sans', sans-serif;
+}

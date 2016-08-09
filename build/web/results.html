@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Hooli Search</title>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="styles.css" type="text/css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div id="headerContainer">
+            <a href="index.html" id="smallLogo"><span class="blue">H</span><span class="red">o</span><span class="yellow">o</span><span class="green">l</span><span class="blue">i</span></a>
+
+            <form action="performSearch" method="POST" id="secondSearch">
+                <input type="text" name="searchInput" id="searchInput"> 
+                <input type="submit" value="Search">
+            </form>
+            <hr>
+        </div>
+        
+        
+        <p id="stats">(x number) results for derp (y seconds)</p>
+        
+        <table id="results">
+            <tr>
+                <td class="resultContent">
+                    <a href="link">Title of wikipedia link - Wikipedia, the free encyclopedia</a>
+                    <div class="sneakPeak">
+                        <div class="wikiLink">https://en.wikipedia.org/wiki/<span class="strong">Something</span></div>
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+                    </div>
+                </td>
+                <td>
+                    Something
+                </td>
+            </tr>
+            <tr>
+                <td class="resultContent">
+                    <a href="link">Title of wikipedia link - Wikipedia, the free encyclopedia</a>
+                    <div class="sneakPeak">
+                        <div class="wikiLink">https://en.wikipedia.org/wiki/<span class="strong">Something</span></div>
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+                    </div>
+                </td>
+                <td>
+                    Something
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
+
