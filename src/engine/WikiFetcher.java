@@ -41,7 +41,7 @@ public class WikiFetcher {
 	}
         
         public Map<String, String> fetchWebAssets(String url) throws IOException{
-
+            
             HashMap<String, String> HtmlAssets=new HashMap<String, String>();
             
             Connection conn = Jsoup.connect(url);
@@ -71,7 +71,7 @@ public class WikiFetcher {
                 }
            
             
-            return HtmlAssets;
+            return HtmlAssets; 
                 
         }
 

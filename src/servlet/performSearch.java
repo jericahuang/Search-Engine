@@ -87,22 +87,16 @@ public class performSearch extends HttpServlet {
         
         response.setContentType("text/html; charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String query = request.getParameter("searchInput");
+        String query = request.getParameter("q");
         
-        out.print("<!DOCTYPE html><html><head><title>Hooli Search</title><link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>\n" +
-"        <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>\n" +
-"        <link rel=\"stylesheet\" href=\"styles.css\" type=\"text/css\">\n" +
-"        <meta charset=\"UTF-8\">\n" +
-"        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"favicon.ico\" rel=\"icon\" type=\"image/x-icon\" />\n" +
-"        <link href=\"favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\">\n" +
-"    </head>\n" +
-"    <body>"+"<div id=\"headerContainer\">\n" +
+        out.print("<div id=\"headerContainer\">\n" +
 "            <a href=\"index.html\" id=\"smallLogo\"><span class=\"blue\">H</span><span class=\"red\">o</span><span class=\"yellow\">o</span><span class=\"green\">l</span><span class=\"blue\">i</span></a>\n" +
 "\n" +
-"            <form action=\"performSearch\" method=\"POST\" id=\"secondSearch\">\n" +
+"            <form method=\"POST\" id=\"secondSearch\">\n" +
 "                <input type=\"text\" name=\"searchInput\" id=\"searchInput\" value=\""+query+"\"> \n" +
-"                <input type=\"submit\" value=\"Search\">\n" +
-"            </form><hr></div>");
+"                <input type=\"button\" value=\"Search\" id = \"searchButton\">\n" +
+"            </form><hr></div><div id=\"hooli\"></div>");
+        try{
         Jedis jedis = JedisMaker.make();
         JedisIndex index = new JedisIndex(jedis);
 
@@ -117,10 +111,12 @@ public class performSearch extends HttpServlet {
         while (!results.empty()){
             out.print(results.pop());
         }
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
         
-        
-        out.print("</table></div></body></html>");
-            
+        out.print("</table></div>");
         
         
         out.close();

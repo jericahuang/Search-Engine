@@ -83,7 +83,7 @@ body{
 
 
 
-div#hooli{
+#hooli{
     display: none;
     vertical-align: middle;
     padding: 1% 4%;
@@ -91,7 +91,6 @@ div#hooli{
     width:90%;
     margin-left:50px;
     margin-bottom:30px;
-    display:block;
 }
 
 #hooli img, #hooli svg, #hooli g{

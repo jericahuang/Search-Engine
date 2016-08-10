@@ -4,36 +4,59 @@
  * and open the template in the editor.
  */
 
-var request;
-
+var request1;
+var request2;
 
 $(document).ready(function(){
-    request = null;
+    request1 = null;
+    request2 = null;
+    
     $("body").on("click","#searchButton",function(){
-        if (request){ request.abort(); };
+        if (request1){ request1.abort(); };
+        if (request2){ request2.abort(); };
     
         var query = $("#searchInput").val();
         console.log(query);
 
         var dataToSend = {q: query};
+        
+        //Parallel AJAX requests
         $.when(
-            request = $.ajax({
+            
+            //Search
+            request1 = $.ajax({
                 url:"performSearch",
                 type: "post",
                 data: dataToSend,
                 dataType: "json"
             })
             .always(function(){
-                console.log(request.responseText);
-                jQuery("body").html(request.responseText);
-                request = null;
+                jQuery("body").html(request1.responseText);
+                request1 = null;
             })
-        
-            ,getQandA()
+            ,
+          
+            //Q and A
+            request2 = $.ajax({
+                url:"QandA",
+                type: "post",
+                data: dataToSend,
+                dataType: "json"
+            })
+            .always(function(){
+                var str = request2.responseText;
+                if (str != null && str != "<error>"){
+                    $("<style>").text("div#hooli { display:block; }").appendTo("body");        
+                    document.getElementById("hooli").innerHTML = str;
+                }
+                else{
+                    $("<style>").text("div#hooli { display:none; }").appendTo("body");        
+                    document.getElementById("hooli").innerHTML = "";
+                }
+                request2 = null;
+            })
         ).then(function() {
-            getResults();
-          // All have been resolved (or rejected), do your thing
-
+            console.log("done");
         });
         
     });
@@ -41,25 +64,53 @@ $(document).ready(function(){
     $(document).keypress(function(e) {
     if(e.which == 13) {
         event.preventDefault();
-        getResults();
+        
+        if (request1){ request1.abort(); };
+        if (request2){ request2.abort(); };
+    
+        var query = $("#searchInput").val();
+        console.log(query);
+
+        var dataToSend = {q: query};
+        
+        //Parallel AJAX requests
+        $.when(
+            
+            //Search
+            request1 = $.ajax({
+                url:"performSearch",
+                type: "post",
+                data: dataToSend,
+                dataType: "json"
+            })
+            .always(function(){
+                jQuery("body").html(request1.responseText);
+                request1 = null;
+            })
+            ,
+          
+            //Q and A
+            request2 = $.ajax({
+                url:"QandA",
+                type: "post",
+                data: dataToSend,
+                dataType: "json"
+            })
+            .always(function(){
+                var str = request2.responseText;
+                if (str != null && str != "<error>"){
+                    $("<style>").text("div#hooli { display:block; }").appendTo("body");        
+                    document.getElementById("hooli").innerHTML = str;
+                }
+                else{
+                    $("<style>").text("div#hooli { display:none; }").appendTo("body");        
+                    document.getElementById("hooli").innerHTML = "";
+                }
+                request2 = null;
+            })
+        ).then(function() {
+            
+        });
     }
 });
 });
-
-function getQandA(){
-    return "";
-}
-
-
-function getResults(){
-    
-    
-    
-}
-
-
-
-
-function displayAnswer(response){
-    console.log(response);
-}
