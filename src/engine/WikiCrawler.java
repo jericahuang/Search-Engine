@@ -112,7 +112,7 @@ public class WikiCrawler {
 	 */
 	private void queueInternalLinks(Element paragraph) {
 		Elements elts = paragraph.select("a[href]");
-		int counter = 0;
+
 		for (Element elt: elts) {
 			String relURL = elt.attr("href");
 
@@ -122,7 +122,6 @@ public class WikiCrawler {
 
 				//TODO: offer to redis list
 				jedis.rpush("jobQueue", absURL);
-				counter++;
 				//queue.offer(absURL);
 			}
 		}
@@ -144,7 +143,7 @@ public class WikiCrawler {
 		System.out.println(jedis.llen("jobQueue"));
 
 		 */
-		// make a WikiCrawler
+		// make a WikiCrawler2
 		Jedis jedis = JedisMaker.make();
 		JedisIndex index = new JedisIndex(jedis);
 		String source = "https://en.wikipedia.org/wiki/Java_(Programming_Language)";

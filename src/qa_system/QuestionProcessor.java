@@ -43,7 +43,9 @@ public class QuestionProcessor {
 		 			  break;
 		case "Who":   this.responseGen = new Who(query, this.subject, this.predicate);
 		 			  break;
-		case "Where": this.responseGen = new Where(query, this.subject, this.predicate);
+		case "Where": System.out.println("YEAH");
+				this.responseGen = new Where(query, this.subject, this.predicate);
+
 		 			  break;
 		case "How":	  this.responseGen = new How(query, this.subject, this.predicate);
 		 			  break;

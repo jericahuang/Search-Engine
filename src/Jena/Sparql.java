@@ -58,8 +58,8 @@ public class Sparql {
 			    "?Location geo-ont:parentFeature ?o." +
 			    "?o geo-ont:parentCountry dbpedia:United_States . }";
 
-			String gf = prefix  + " SELECT ?o WHERE { dbpedia:Owl owl:sameAs ?o  . }";
-			String q = prefix + " SELECT ?o WHERE { <http://rdf.freebase.com/ns/m.045c7b> dbp-ont:abstract ?o  . }";
+			String gf = prefix  + " SELECT ?o WHERE { dbpedia:Barack_Obama owl:sameAs ?o  . }";
+			String q = prefix + " SELECT ?o WHERE { <http://rdf.freebase.com/ns/m.02mjmr> <http://rdf.freebase.com/ns/people.person.place_of_birth> ?o  . }";
 
 
 		//String queryString = " DESCRIBE ?object WHERE {<http://dbpedia.org/resource/Google> ?predicate ?object .}";
@@ -67,7 +67,7 @@ public class Sparql {
 
 
 		Query query = QueryFactory.create(queryString);
-		QueryExecution qexec = QueryExecutionFactory.sparqlService("http://factforge.net/sparql", gf);
+		QueryExecution qexec = QueryExecutionFactory.sparqlService("http://factforge.net/sparql", q);
 		try
 		{
 			ResultSet results = qexec.execSelect();

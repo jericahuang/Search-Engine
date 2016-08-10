@@ -1,10 +1,18 @@
 package qa_system;
 
+import java.io.IOException;
+
+import engine.JedisMaker;
+import redis.clients.jedis.Jedis;
+
 public class Driver {
 
-	public static void main(String [] args) {
+	public static void main(String [] args) throws IOException {
 
-		String query = "What is life?";
+		Jedis jedis = JedisMaker.make();
+		jedis.del("jobQueue");
+
+		String query = "Where was Barack Obama born?";
 
 		QuestionProcessor qp = new QuestionProcessor();
 
