@@ -32,10 +32,13 @@ public class WikiCrawlMain {
 
 		ThreadPoolExecutor threads = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_SIZE);
 
-		for(int i = 0; i <= THREAD_SIZE; i++){
-			WikiRunnable wr = new WikiRunnable(source, index);
+		for(int i = 0; i < THREAD_SIZE; i++){
+			WikiRunnable wr = new WikiRunnable(source, index, jedis);
 			Future<?> futureVal = threads.submit(wr);
 			futureList.append(futureVal);
+			System.out.println("HI");
+			wr.run();
+
 		}
 
 		for(Future<?> futureE: futureList){

@@ -110,18 +110,18 @@ public class JedisIndex {
 	}
 
 	public boolean checkTitleForTerm(String checkUrl, String checkTerm){
-		
+
 		int titleStInd = checkUrl.lastIndexOf("/");
-		System.out.println("last index is " + titleStInd);
+		//System.out.println("last index is " + titleStInd);
 		if (checkUrl.toLowerCase().contains(checkTerm.toLowerCase())){
 			return true;
 		}
 		else {
 			return false;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Looks up a term and returns a map from URL to count.
 	 *
@@ -149,11 +149,10 @@ public class JedisIndex {
 		int i = 0;
 		for (String url: urls) {
 			boolean titleHasTerm;
-			String url2 = "https://en.wikipedia.org/wiki/Java_(programming_language)";
-			String term2 = "java";
+
 			titleHasTerm = checkTitleForTerm(url, term);
-			System.out.println("TERM: " + term + " URL: " + url + " CONTAINS: " + titleHasTerm);
-			
+			//System.out.println("TERM: " + term + " URL: " + url + " CONTAINS: " + titleHasTerm);
+
 //			System.out.println("URL " + url);
 //			System.out.println("NUMBER OF DOCUMENTS: " + getNumDocs());
 //			System.out.println(term + " " + getURLSetSize(term));
@@ -163,11 +162,11 @@ public class JedisIndex {
 			if (getNumDocs()/getURLSetSize(term) == 1.0) idf = Math.log10(1.000111);
 
 			Double count = (new Double((String) res.get(i++))) * (idf * Math.pow(10, 4));
-			
-			System.out.println("COUNT BEFORE " + count);
+
+			//System.out.println("COUNT BEFORE " + count);
 			if (titleHasTerm){
 				count = count*TITLE_WEIGHT;
-				System.out.println("COUNT AFTER " + count);
+				//System.out.println("COUNT AFTER " + count);
 			}
 
 			map.put(url, count);
@@ -224,7 +223,7 @@ public class JedisIndex {
 		// member of the index
 		for (String term: tc.keySet()) {
 			Double count = tc.getTfVal(term);
-			System.out.println(term + "  " + count);
+			//System.out.println(term + "  " + count);
 			t.hset(hashname, term, count.toString());
 			t.sadd(urlSetKey(term), url);
 		}
@@ -384,8 +383,6 @@ public class JedisIndex {
 		String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 		Elements paragraphs = wf.readWikipedia(url);
 		index.indexPage(url, paragraphs);
-
-
 		url = "https://en.wikipedia.org/wiki/Programming_language";
 		paragraphs = wf.readWikipedia(url);
 		index.indexPage(url, paragraphs);

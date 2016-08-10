@@ -1,1 +1,1 @@
-redis://redistogo:8ccf2e4210ece46c44a5613d9f217b10@slimehead.redistogo.com:9016
+redis://redistogo:41791de40b32f8ee34db6eea40e1f5c0@sculpin.redistogo.com:9294/

@@ -10,15 +10,18 @@ public class WikiRunnable implements Runnable{
 	public WikiCrawler wc;
 	Jedis jedis;
 
-	public WikiRunnable(String source, JedisIndex index){
+	public WikiRunnable(String source, JedisIndex index, Jedis jedis){
 		wc = new WikiCrawler(source, index, jedis);
+		this.jedis = jedis;
 	}
 
 	public void run(){
 		try {
 			String result;
-			Queue<String> crawlQueue = wc.getQueue();
-			while (crawlQueue.poll() != null){
+
+			System.out.println(jedis.llen("jobQueue"));
+			while (jedis.llen("jobQueue") > 0){
+				System.out.println("hi");
 				result = wc.crawl(false);
 			}
 

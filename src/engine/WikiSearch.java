@@ -128,64 +128,64 @@ public class WikiSearch {
 
 		// make a Comparator object for sorting
 		Comparator<Entry<String, Double>> comparator = new Comparator<Entry<String, Double>>() {
-            @Override
-            public int compare(Entry<String, Double> e1, Entry<String, Double> e2) {
-                return e1.getValue().compareTo(e2.getValue());
-            }
-        };
+			@Override
+			public int compare(Entry<String, Double> e1, Entry<String, Double> e2) {
+				return e1.getValue().compareTo(e2.getValue());
+			}
+		};
 
-        // sort and return the entries
+		// sort and return the entries
 		Collections.sort(entries, comparator);
 		return entries;
 	}
 
-    /**
- * Returns a list of HTML renditions of the search results
- *
- * @return
- */
 	/**
 	 * Returns a list of HTML renditions of the search results
 	 *
 	 * @return
 	 */
-        public Stack<String> searchToHtml() throws IOException{
-            Stack<String> fullHtml = new Stack<String>();
+	/**
+	 * Returns a list of HTML renditions of the search results
+	 *
+	 * @return
+	 */
+	public Stack<String> searchToHtml() throws IOException{
+		Stack<String> fullHtml = new Stack<String>();
 
-            WikiFetcher wf = new WikiFetcher();
-            
-            for (String wikiUrl : this.map.keySet()){
-                
-                Map<String, String> assets = wf.fetchWebAssets(wikiUrl);
-                System.out.println(assets);
-                
-                String firstParagraph = assets.get("para");
-                
-                String markup="<tr>\n" +
-"                <td class=\"resultContent\">\n" +
-"                    <a href=\""+wikiUrl+"\" target = \"blank\">"+assets.get("title")+"</a>\n" +
-"                    <div class=\"sneakPeak\">\n" +
-"                        <div class=\"wikiLink\">"+wikiUrl.substring(0,wikiUrl.lastIndexOf("/"))+"/<span class=\"strong\">"+wikiUrl.substring(wikiUrl.lastIndexOf("/")+1)+"</span></div>\n" +
-"                         " +firstParagraph.substring(0,Math.min(firstParagraph.length(),320))+"..."+
-"                    </div>\n" +
-"                </td><td>";
-                
-                if (assets.containsKey("imgUrl")){
-                    markup+="<div class=\"imgContainer\">\n" +
-"                        <span class=\"helper\"></span><img class=\"wikiImg\" src=\""+assets.get("imgUrl")+"\">\n" +
-"                    </div>\n" +
-"                </td>\n" +
-"            </tr>";
-                }
-                else{
-                    markup+="</td></tr>";
-                }               
-                
-                fullHtml.push(markup);
-            }
-            
-            return fullHtml;
-        }
+		WikiFetcher wf = new WikiFetcher();
+
+		for (String wikiUrl : this.map.keySet()){
+
+			Map<String, String> assets = wf.fetchWebAssets(wikiUrl);
+			System.out.println(assets);
+
+			String firstParagraph = assets.get("para");
+
+			String markup="<tr>\n" +
+					"                <td class=\"resultContent\">\n" +
+					"                    <a href=\""+wikiUrl+"\" target = \"blank\">"+assets.get("title")+"</a>\n" +
+					"                    <div class=\"sneakPeak\">\n" +
+					"                        <div class=\"wikiLink\">"+wikiUrl.substring(0,wikiUrl.lastIndexOf("/"))+"/<span class=\"strong\">"+wikiUrl.substring(wikiUrl.lastIndexOf("/")+1)+"</span></div>\n" +
+					"                         " +firstParagraph.substring(0,Math.min(firstParagraph.length(),320))+"..."+
+					"                    </div>\n" +
+					"                </td><td>";
+
+			if (assets.containsKey("imgUrl")){
+				markup+="<div class=\"imgContainer\">\n" +
+						"                        <span class=\"helper\"></span><img class=\"wikiImg\" src=\""+assets.get("imgUrl")+"\">\n" +
+						"                    </div>\n" +
+						"                </td>\n" +
+						"            </tr>";
+			}
+			else{
+				markup+="</td></tr>";
+			}
+
+			fullHtml.push(markup);
+		}
+
+		return fullHtml;
+	}
 
 	/**
 	 * Performs a search and makes a WikiSearch object.
@@ -197,10 +197,10 @@ public class WikiSearch {
 	public static WikiSearch search(String term, JedisIndex index) {
 		Map<String, Double> map = index.getCountsFaster(term);
 		return new WikiSearch(map);
-	} 
- 
+	}
+
 	public static void main(String[] args) throws IOException {
- 
+
 		// make a JedisIndex
 		Jedis jedis = JedisMaker.make();
 		JedisIndex index = new JedisIndex(jedis);

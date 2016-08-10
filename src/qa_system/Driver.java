@@ -4,7 +4,7 @@ public class Driver {
 
 	public static void main(String [] args) {
 
-		String query = "What is Java (Programming_Language)?";
+		String query = "What is life?";
 
 		QuestionProcessor qp = new QuestionProcessor();
 

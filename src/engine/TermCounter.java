@@ -31,6 +31,7 @@ public class TermCounter {
 	private Map<String, Double> tfVal;
 	private String label;
 	private int numTokens;
+	private boolean firstPara = true;
 
 	public TermCounter(String label) {
 		this.label = label;
@@ -68,7 +69,7 @@ public class TermCounter {
 		for (String term : keySet()) {
 			Double count = map.get(term);
 			Double tf_score = ((double) count) / ((double) numTokens);
-			this.tfVal.put(term, tf_score * Math.pow(10, 4));
+			this.tfVal.put(term, tf_score);
 			//System.out.println("TEST  " + ((double) count)/array.length);
 			//System.out.println(tf_score);
 		}
@@ -177,7 +178,7 @@ public class TermCounter {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
+		String url = "https://en.wikipedia.org/wiki/Google";
 
 		WikiFetcher wf = new WikiFetcher();
 		Elements paragraphs = wf.fetchWikipedia(url);

@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import redis.clients.jedis.Jedis;
 
+import redis.clients.jedis.Jedis;
 
 public class WikiCrawler {
 	// keeps track of where we started
@@ -27,9 +27,8 @@ public class WikiCrawler {
 	// queue of URLs to be indexed
 	private Queue<String> queue = new ConcurrentLinkedQueue<String>();
 
-
 	// fetcher used to get pages from Wikipedia
-	final static WikiFetcher wf = new WikiFetcher();
+	static WikiFetcher wf = new WikiFetcher();
 
 	/**
 	 * Constructor.
@@ -67,7 +66,6 @@ public class WikiCrawler {
 	 * @throws IOException
 	 */
 	public String crawl(boolean testing) throws IOException {
-		System.out.println("START");
 		if (queueSize() == 0) {
 			return null;
 		}
@@ -75,49 +73,24 @@ public class WikiCrawler {
 		String url = jedis.lpop("jobQueue");
 		System.out.println("Crawling " + url);
 
-		if ((testing==false && index.isIndexed(url))) {
+		if ((testing==false && index.isIndexed(url)) || (jedis.sismember("URLS", url) == true)) {
 			System.out.println("Already indexed.");
-			return null;
+			return url;
 		}
 
-		if (jedis.sismember("URLS", url) == true) {
-			System.out.println("HI");
-			return null;
-		}
+		else {
+			Elements paragraphs;
+			if (testing) {
+				paragraphs = wf.readWikipedia(url);
+			} else {
+				paragraphs = wf.fetchWikipedia(url);
+			}
 
-		Elements paragraphs;
-		if (testing) {
-			paragraphs = wf.readWikipedia(url);
-		} else {
-			paragraphs = wf.fetchWikipedia(url);
+			index.indexPage(url, paragraphs);
+			queueInternalLinks(paragraphs);
+			jedis.sadd("URLS", url);
+			return url;
 		}
-		jedis.sadd("URLS", url);
-		index.indexPage(url, paragraphs);
-		queueInternalLinks(paragraphs);
-		return url;
-		/*
-		if (queue.isEmpty()) {
-			return null;
-		}
-		String url = queue.poll();
-		System.out.println("Crawling " + url);
-
-		if (testing==false && index.isIndexed(url)) {
-			System.out.println("Already indexed.");
-			return null;
-		}
-
-		Elements paragraphs;
-		if (testing) {
-			paragraphs = wf.readWikipedia(url);
-		} else {
-			paragraphs = wf.fetchWikipedia(url);
-		}
-		index.indexPage(url, paragraphs);
-		queueInternalLinks(paragraphs);
-		return url;
-
-		 */
 	}
 
 	/**
@@ -147,7 +120,6 @@ public class WikiCrawler {
 				String absURL = "https://en.wikipedia.org" + relURL;
 				//System.out.println(absURL);
 
-				System.out.println("absURL");
 				//TODO: offer to redis list
 				jedis.rpush("jobQueue", absURL);
 				counter++;
@@ -158,6 +130,7 @@ public class WikiCrawler {
 	}
 
 	public static void main(String[] args) throws IOException {
+
 		/*
 		Jedis jedis = JedisMaker.make();
 		Set<String> urls = jedis.smembers("URLS");
@@ -170,17 +143,18 @@ public class WikiCrawler {
 
 		System.out.println(jedis.llen("jobQueue"));
 
-		*/
+		 */
 		// make a WikiCrawler
 		Jedis jedis = JedisMaker.make();
 		JedisIndex index = new JedisIndex(jedis);
-		String source = "https://en.wikipedia.org/wiki/Barack_Obama";
+		String source = "https://en.wikipedia.org/wiki/Java_(Programming_Language)";
 		WikiCrawler wc = new WikiCrawler(source, index, jedis);
 
 		//for testing purposes, load up the queue
 		Elements paragraphs = wf.fetchWikipedia(source);
 		wc.queueInternalLinks(paragraphs);
 
+		System.out.println();
 		// loop until we index a new page
 		String res;
 		do {
