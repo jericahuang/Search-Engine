@@ -22,7 +22,6 @@ public class JedisIndex {
 
 	private Jedis jedis;
 	private static final double TITLE_WEIGHT = 1.5;
-
 	/**
 	 * Constructor.
 	 *
