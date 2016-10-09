@@ -19,21 +19,93 @@ body{
 .sneakPeak{
     color:#999;
     margin-top:5px;
+    margin-bottom:3px;
     padding-left:20px;
-    font-size:15px;
+    font-size:13px;
 }
 
 .strong{
     font-weight:700;
 }
 
+.helper {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.imgContainer{
+    width:122px;
+    height:122px;
+    background-color:#f9f9f9;
+    text-align: center;
+}
+
+.wikiImg{
+    max-width:115px;
+    max-height:115px;
+    margin:auto;
+    vertical-align: middle;
+}
+
+#bubbleContainer{
+    display:inline-block;
+}
+
+.bubble {
+    vertical-align: middle;
+    display: inline-block;
+    position: relative;
+    width: 500px;
+    height: 100px;
+    padding:15px;
+    padding-left:25px;
+    background: #f7f7f7;
+    margin-left:30px;
+    -webkit-border-radius: 14px;
+    -moz-border-radius: 14px;
+    border-radius: 14px;
+}
+
+  .bubble:after {
+    content: "";
+    position: absolute;
+    top: 49px;
+    left: -22px;
+    border-style: solid;
+    border-width: 21px 22px 21px 0;
+    border-color: transparent #f7f7f7;
+    display: block;
+    width: 0;
+    z-index: 1;
+}
+
+
+
+
+#hooli{
+    display: none;
+    vertical-align: middle;
+    padding: 1% 4%;
+    height:200px;
+    width:90%;
+    margin-left:50px;
+    margin-bottom:30px;
+}
+
+#hooli img, #hooli svg, #hooli g{
+    vertical-align: middle;
+    display:inline-block;
+}
+
 table#results{
     padding:2% 4%;
+    padding-top:1%;
 }
 
 table#results tr{
     display:block;
-    margin:45px 0px;
+    margin-bottom:20px;
 }
 
 table#results tr:first-child{
@@ -73,6 +145,9 @@ form#secondSearch{
 }
 
 .wikiLink{
+    display: block;
+    margin-bottom:2px;
+    margin-top:-2px;
     color:rgb(0,102,33);
 }
 
@@ -124,7 +199,8 @@ input[type="text"]{
     margin-right:10px;
 }
 
-input[type=submit] {
+input[type=button] {
+    cursor: hand;
     padding:9px 18px; 
     background:#4285f4; 
     color:#fff;

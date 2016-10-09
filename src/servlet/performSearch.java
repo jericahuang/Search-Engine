@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import engine.WikiSearch;
 import static engine.WikiSearch.search;
+import java.util.List;
+import java.util.Stack;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -68,7 +70,7 @@ public class performSearch extends HttpServlet {
     }
     
     
-    public long startTime = System.currentTimeMillis();
+    
     /**
      * Handles the HTTP <code>POST</code> method.
      *
@@ -81,37 +83,44 @@ public class performSearch extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        long startTime = System.currentTimeMillis();
+        
         response.setContentType("text/html; charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String query = request.getParameter("searchInput");
+        String query = request.getParameter("q");
         
-        out.print("<!DOCTYPE html><html><head><title>Hooli Search</title><link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>\n" +
-"        <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>\n" +
-"        <link rel=\"stylesheet\" href=\"styles.css\" type=\"text/css\">\n" +
-"        <meta charset=\"UTF-8\">\n" +
-"        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"favicon.ico\" rel=\"icon\" type=\"image/x-icon\" />\n" +
-"        <link href=\"favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\">\n" +
-"    </head>\n" +
-"    <body>"+"<div id=\"resultContainer\">\n" +
+        out.print("<div id=\"headerContainer\">\n" +
 "            <a href=\"index.html\" id=\"smallLogo\"><span class=\"blue\">H</span><span class=\"red\">o</span><span class=\"yellow\">o</span><span class=\"green\">l</span><span class=\"blue\">i</span></a>\n" +
 "\n" +
-"            <form action=\"performSearch\" method=\"POST\" id=\"secondSearch\">\n" +
+"            <form method=\"POST\" id=\"secondSearch\">\n" +
 "                <input type=\"text\" name=\"searchInput\" id=\"searchInput\" value=\""+query+"\"> \n" +
-"                <input type=\"submit\" value=\"Search\">\n" +
-"            </form><hr>");
-        double finalTime = (System.currentTimeMillis() - startTime)/1000.0;
-        out.println("Search results for " + query+" ("+finalTime+" seconds)<br><br>");
+"                <input type=\"button\" value=\"Search\" id = \"searchButton\">\n" +
+"            </form><hr></div><div id=\"hooli\"></div>");
         try{
-            Jedis jedis = JedisMaker.make();
-            JedisIndex index = new JedisIndex(jedis);
+        Jedis jedis = JedisMaker.make();
+        JedisIndex index = new JedisIndex(jedis);
 
-            WikiSearch search1 = search(query, index);
-            out.println(search1.print());
+        WikiSearch search = search(query, index);
+        
+        Stack<String> results = search.searchToHtml(); 
+        
+        double finalTime = (System.currentTimeMillis() - startTime)/1000.0;
+        out.print("<p id=\"stats\">"+results.size()+" results for <span class='strong'>"+query+"</span> ("+finalTime+" seconds)</p><table id=\"results\">");
+          
+        
+        while (!results.empty()){
+            out.print(results.pop());
         }
-        finally{
-            out.print("</div></body></html>");
-            out.close();
         }
+        catch (Exception e){
+            System.out.println(e);
+        }
+        
+        out.print("</table></div>");
+        
+        
+        out.close();
+        
     }
     
     
